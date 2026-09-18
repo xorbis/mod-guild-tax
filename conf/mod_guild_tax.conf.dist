@@ -1,0 +1,70 @@
+#
+# mod-guild-tax: a share of the money guild members loot and earn from quests goes to the guild bank.
+#
+
+[worldserver]
+
+########################################
+# Guild tax
+########################################
+#
+#    GuildTax.Enable
+#        Description: Tax the money guild members loot and earn from quests into their guild bank.
+#                     Vendor sales, mail, trades and the auction house are not income and are left alone.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+#
+
+GuildTax.Enable = 1
+
+#
+#    GuildTax.DefaultPercent
+#        Description: Rate for a guild whose MOTD has no tax tag. A guild sets its own rate with a
+#                     tag like [tax: 10%] in its MOTD ([tax:10] and [Tax=5%] work too, [tax: 0%]
+#                     opts the guild out); anyone whose rank may set the MOTD can change it, and
+#                     every member sees it at login. Applies to looted and quest money alike.
+#        Default:     0 - (guilds opt in through their MOTD)
+#
+
+GuildTax.DefaultPercent = 0
+
+#
+#    GuildTax.MaxPercent
+#        Description: Highest rate a MOTD tag (or the default) can set. Range: 0-100.
+#        Default:     50
+#
+
+GuildTax.MaxPercent = 50
+
+#
+#    GuildTax.DepositThreshold
+#        Description: The tax is added up per character and deposited once it reaches this amount
+#                     (in copper), and in any case at the next character save: the autosave
+#                     (PlayerSaveInterval), logging out, or leaving the guild. Keeps the guild bank
+#                     money log, which only holds the last few entries, from filling up with
+#                     copper deposits. The character keeps holding the money until then.
+#        Default:     10000 - (1 gold)
+#                     0 - (deposit at every loot and quest)
+#
+
+GuildTax.DepositThreshold = 10000
+
+#
+#    GuildTax.Bots
+#        Description: Player bots (mod-playerbots) pay the tax too. Off, a bot in a player's guild
+#                     never feeds its bank.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+#
+
+GuildTax.Bots = 0
+
+#
+#    GuildTax.Announce
+#        Description: Tell the character when a deposit is made
+#                     ("Guild tax: 1 gold 5 silver deposited to the guild bank.").
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+#
+
+GuildTax.Announce = 1

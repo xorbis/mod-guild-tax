@@ -1,0 +1,9 @@
+!.gitignore
+*.orig
+*.rej
+*.bak
+*.patch
+*.diff
+*.swp
+*~
+.DS_Store
