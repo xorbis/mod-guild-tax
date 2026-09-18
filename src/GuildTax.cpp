@@ -23,6 +23,7 @@
 #include "World.h"
 
 #include <algorithm>
+#include <mutex>
 #include <regex>
 #include <string>
 #include <vector>
@@ -97,8 +98,15 @@ namespace
 
     // Moves what the character owes into the guild bank. The character may have spent part of it
     // since it was accrued; what cannot be paid stays owed.
+    //
+    // Quest turn-ins and autosaves run on the map update threads, so two members on different maps
+    // can get here at once; the core only touches the bank money and its log from the world thread,
+    // which never runs alongside a map update, so one lock over the module's own deposits is enough.
     void Deposit(Player* player, Guild* guild, Ledger& ledger)
     {
+        static std::mutex depositLock;
+        std::lock_guard<std::mutex> lock(depositLock);
+
         uint32 amount = std::min(ledger.owed, player->GetMoney());
         if (!amount || guild->GetTotalBankMoney() + amount > GUILD_BANK_MONEY_LIMIT)
             return;
