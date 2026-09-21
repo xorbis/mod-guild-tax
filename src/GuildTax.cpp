@@ -430,7 +430,7 @@ namespace
     // ".guild ledger": the guild's members with their rank and what each deposited, withdrew, had
     // repaired and paid in tax, and the balance of the four (deposited + tax - withdrawn - repairs).
     // The guild master and the officers (a rank that hears officer chat) get every member; anyone
-    // else gets the header and their own line. The XorWoW client addon sends it for /guildinfo.
+    // else gets the header and their own line. The XorWoW client addon sends it for /guildbank.
     class GuildTaxCommands : public CommandScript
     {
     public:
