@@ -9,9 +9,10 @@
 // (Guild::HandleMemberDepositMoney), so they show up in the bank's money log.
 //
 // That log only keeps the last few entries, so the module also keeps a running total per member
-// of what went through the bank (guild_member_ledger: deposits, withdrawals, tax) and shows it
-// with ".guild ledger": every member with their rank, what they deposited, withdrew and paid in
-// tax, and the balance of the three.
+// of what went through the bank (guild_member_ledger: deposits, withdrawals, repairs, tax) and
+// shows it with ".guild ledger": each member with their rank, what they deposited, withdrew, had
+// repaired and paid in tax, and the balance of the four. The guild master and the officers see
+// every member, anyone else their own line.
 
 #include "Chat.h"
 #include "CommandScript.h"
@@ -298,10 +299,10 @@ namespace
     };
 
     // Running total per guild and member of the money that went through the bank
-    // (guild_member_ledger, in copper): what the member deposited, withdrew (repairs included) and
-    // paid in tax. The bank's own money log is capped (Guild.BankEventLogRecordsCount, 25 by
-    // default), this is not. Rows outlive a membership: a member who leaves and comes back finds
-    // their numbers again; a disbanded guild's rows go with it.
+    // (guild_member_ledger, in copper): what the member deposited, withdrew, had the bank pay for
+    // repairs and paid in tax. The bank's own money log is capped (Guild.BankEventLogRecordsCount,
+    // 25 by default), this is not. Rows outlive a membership: a member who leaves and comes back
+    // finds their numbers again; a disbanded guild's rows go with it.
 
     // The ledger's column a money log event goes to, or nullptr for the item events. The log does
     // not say which deposits were the module's; the seed below asks for a guess (isTax), the live
@@ -311,8 +312,8 @@ namespace
         switch (eventType)
         {
             case GUILD_BANK_LOG_DEPOSIT_MONEY:  return isTax ? "tax" : "deposited";
-            case GUILD_BANK_LOG_WITHDRAW_MONEY:
-            case GUILD_BANK_LOG_REPAIR_MONEY:   return "withdrawn";
+            case GUILD_BANK_LOG_WITHDRAW_MONEY: return "withdrawn";
+            case GUILD_BANK_LOG_REPAIR_MONEY:   return "repairs";
             default:                            return nullptr;
         }
     }
@@ -426,9 +427,10 @@ namespace
         }
     }
 
-    // ".guild ledger": the guild's members with their rank and what each deposited, withdrew and paid
-    // in tax, and the balance of the three (deposited + tax - withdrawn). Every member can run it,
-    // as every member can read the bank's money log. The XorWoW client addon sends it for /guildinfo.
+    // ".guild ledger": the guild's members with their rank and what each deposited, withdrew, had
+    // repaired and paid in tax, and the balance of the four (deposited + tax - withdrawn - repairs).
+    // The guild master and the officers (a rank that hears officer chat) get every member; anyone
+    // else gets the header and their own line. The XorWoW client addon sends it for /guildinfo.
     class GuildTaxCommands : public CommandScript
     {
     public:
@@ -460,15 +462,18 @@ namespace
                 return true;
             }
 
+            bool const officer = guild->GetLeaderGUID() == player->GetGUID() || guild->HasRankRight(player, GR_RIGHT_OFFCHATLISTEN);
+
             // The member list and rank names are the guild's tables (kept in step with the guild in
             // memory); one query joins the ledger to them. Offline members included, guild master first.
             QueryResult result = CharacterDatabase.Query(
-                "SELECT c.name, c.class, r.rname, l.deposited, l.withdrawn, l.tax "
+                "SELECT c.name, c.class, r.rname, l.deposited, l.withdrawn, l.repairs, l.tax "
                 "FROM guild_member m "
                 "JOIN characters c ON c.guid = m.guid "
                 "LEFT JOIN guild_rank r ON r.guildid = m.guildid AND r.rid = m.`rank` "
                 "LEFT JOIN guild_member_ledger l ON l.guildid = m.guildid AND l.guid = m.guid "
-                "WHERE m.guildid = {} ORDER BY m.`rank`, c.name", guild->GetId());
+                "WHERE m.guildid = {} {} ORDER BY m.`rank`, c.name",
+                guild->GetId(), officer ? "" : Acore::StringFormat("AND m.guid = {}", player->GetGUID().GetCounter()));
 
             std::string header = Acore::StringFormat("{}: {} members, guild bank {}", guild->GetName(), guild->GetMemberCount(), Coins(guild->GetTotalBankMoney()));
             if (settings.GetConfigValue<bool>(GuildTaxConfig::ENABLE))
@@ -487,10 +492,12 @@ namespace
                 std::string rank = fields[2].Get<std::string>();
                 uint64 deposited = fields[3].Get<uint64>();   // NULL (no row yet) reads as 0
                 uint64 withdrawn = fields[4].Get<uint64>();
-                uint64 tax = fields[5].Get<uint64>();
+                uint64 repairs = fields[5].Get<uint64>();
+                uint64 tax = fields[6].Get<uint64>();
 
-                handler->PSendSysMessage("{}{}|r ({}): deposited {}, withdrawn {}, tax {}, balance {}",
-                    ClassColor(classId), name, rank, Coins(deposited), Coins(withdrawn), Coins(tax), Coins(int64(deposited + tax) - int64(withdrawn)));
+                handler->PSendSysMessage("{}{}|r ({}): deposited {}, withdrawn {}, repairs {}, tax {}, balance {}",
+                    ClassColor(classId), name, rank, Coins(deposited), Coins(withdrawn), Coins(repairs), Coins(tax),
+                    Coins(int64(deposited + tax) - int64(withdrawn + repairs)));
             } while (result->NextRow());
 
             return true;

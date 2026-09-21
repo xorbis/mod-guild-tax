@@ -25,12 +25,12 @@ A character that leaves or is kicked pays what it accrued while a member. A guil
 
 ## The ledger: `.guild ledger`
 
-The bank's money log only shows the last few entries, so the module keeps its own running total per member of what went through the bank: what they deposited themselves, what they withdrew (guild repairs included) and what they paid in tax. Any member can type `.guild ledger` and gets the guild's members with their rank and those three amounts, plus the balance of the three (deposited + tax - withdrawn), guild master first, offline members included:
+The bank's money log only shows the last few entries, so the module keeps its own running total per member of what went through the bank: what they deposited themselves, what they withdrew, what the bank paid for their repairs and what they paid in tax. `.guild ledger` prints the members with their rank and those four amounts, plus the balance of the four (deposited + tax - withdrawn - repairs), guild master first, offline members included. The guild master and the officers - any rank that hears officer chat - see every member; anyone else sees the header and their own line:
 
 ```
 No Name Noobs: 12 members, guild bank 1g 20s 39c, tax 15%
-Xorbis (General): deposited 0c, withdrawn 0c, tax 47s 97c, balance 47s 97c
-Dacrow (Captain): deposited 0c, withdrawn 0c, tax 12s 37c, balance 12s 37c
+Xorbis (General): deposited 4g, withdrawn 27g 72s 36c, repairs 3g 14c, tax 2g 45s 80c, balance -24g 26s 70c
+Dacrow (Captain): deposited 11g, withdrawn 1s 50c, repairs 0c, tax 2g 82s 9c, balance 13g 80s 59c
 ...
 ```
 
