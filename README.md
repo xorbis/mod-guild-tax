@@ -40,7 +40,7 @@ The first time the module starts with an empty ledger it is built from what is s
 
 ## Bots
 
-With [mod-playerbots](https://github.com/mod-playerbots/mod-playerbots) installed, bots do not pay the tax unless `GuildTax.Bots = 1`; a bot in a player's guild would otherwise feed its bank a steady stream of gold.
+With [mod-playerbots](https://github.com/mod-playerbots/mod-playerbots) installed, the random and addclass bots do not pay the tax unless `GuildTax.Bots = 1`; such a bot in a player's guild would otherwise feed its bank a steady stream of gold. A player's own character played by the bot AI (`.playerbots bot add`) pays like its owner, since that gold is the player's.
 
 ## Installation
 

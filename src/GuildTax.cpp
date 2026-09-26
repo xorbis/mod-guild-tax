@@ -32,6 +32,10 @@
 #include "StringFormat.h"
 #include "World.h"
 
+#ifdef MOD_PLAYERBOTS
+#include "RandomPlayerbotMgr.h"
+#endif
+
 #include <algorithm>
 #include <mutex>
 #include <regex>
@@ -144,7 +148,8 @@ namespace
             return;
 
 #ifdef MOD_PLAYERBOTS
-        if (!settings.GetConfigValue<bool>(GuildTaxConfig::BOTS) && player->GetSession()->IsBot())
+        // The realm's random bots are exempt; a player's own character played by the bot AI pays like its owner.
+        if (!settings.GetConfigValue<bool>(GuildTaxConfig::BOTS) && (sRandomPlayerbotMgr.IsRandomBot(player) || sRandomPlayerbotMgr.IsAddclassBot(player)))
             return;
 #endif
 

@@ -51,8 +51,9 @@ GuildTax.DepositThreshold = 10000
 
 #
 #    GuildTax.Bots
-#        Description: Player bots (mod-playerbots) pay the tax too. Off, a bot in a player's guild
-#                     never feeds its bank.
+#        Description: The random and addclass bots (mod-playerbots) pay the tax too. Off, such a bot
+#                     in a player's guild never feeds its bank. A player's own character played by
+#                     the bot AI always pays, like its owner.
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 #
